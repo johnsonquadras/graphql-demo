@@ -20,12 +20,19 @@ app.use(
   })
 );
 
+const context = ({ req }) => {
+  return { method: req.method, user: req.user && db.users.get(req.user.sub) };
+};
+
 // GraphQL
 const typeDefs = gql(fs.readFileSync("./schema.graphql", { encoding: "utf8" }));
 const resolvers = require("./resolvers");
-const apolloServer = new ApolloServer({ typeDefs, resolvers });
+const apolloServer = new ApolloServer({
+  typeDefs,
+  resolvers,
+  context: context
+});
 apolloServer.applyMiddleware({ app, path: "/graphql" });
-
 
 // Authentication
 app.post("/login", (req, res) => {

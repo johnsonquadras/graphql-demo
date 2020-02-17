@@ -21,10 +21,23 @@ const getJobByCompany = company => {
   });
 };
 
+const createJob = (root, { input }, context) => {
+  if (!context.user) {
+    throw new Error("Unauthorized");
+  }
+
+  const id = db.jobs.create({ ...input, companyId: context.user.companyId });
+  return db.jobs.get(id);
+};
+
 const Query = {
   jobs: getJobs,
   job: getJob,
   company: getCompany
+};
+
+const Mutation = {
+  createJob: createJob
 };
 
 const Company = {
@@ -37,4 +50,4 @@ const Job = {
   }
 };
 
-module.exports = { Query, Job, Company };
+module.exports = { Query, Mutation, Job, Company };

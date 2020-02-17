@@ -1,11 +1,18 @@
+import { isLoggedIn, getAccessToken } from "./auth";
+
 const graphqlURL = "http://localhost:3001/graphql";
 
 async function fetchData(query, variables) {
+  const header = {
+    "content-type": "application/json"
+  };
+
+  if (isLoggedIn()) {
+    header["authorization"] = `bearer ${getAccessToken()}`;
+  }
   const response = await fetch(graphqlURL, {
     method: "POST",
-    headers: {
-      "content-type": "application/json"
-    },
+    headers: header,
     body: JSON.stringify({
       query,
       variables
@@ -77,4 +84,20 @@ export async function loadCompany(id) {
 
   const { company } = await fetchData(CompanyQuery, { id });
   return company;
+}
+
+export async function createJob(input) {
+  const AddJobMutation = `
+      mutation  CreateJob($input: CreateJobInput){
+        job: createJob(
+          input: $input
+        ) {
+          id
+          title
+        }
+      }
+    `;
+
+  const { job } = await fetchData(AddJobMutation, { input });
+  return job;
 }
